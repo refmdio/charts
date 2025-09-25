@@ -9,6 +9,7 @@ api:
     repository: ghcr.io/refmdio/refmd/api
     tag: latest
     pullPolicy: IfNotPresent
+  healthPath: /api/health
   service:
     type: ClusterIP
     port: 8888
@@ -17,9 +18,9 @@ api:
     className: ""
     annotations: {}
     hosts:
-      - host: api.example.com
+      - host: refmd.example.com
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
     tls: []
   podAnnotations: {}
@@ -32,8 +33,9 @@ api:
   env:
     RUST_ENV: production
     API_PORT: "8888"
-    FRONTEND_URL: http://localhost:3000
-    PUBLIC_BASE_URL: http://localhost:8888
+    FRONTEND_URL: https://refmd.example.com
+    BACKEND_URL: https://refmd.example.com
+    UPLOADS_DIR: /data/uploads
     UPLOAD_MAX_BYTES: "26214400"
     RUST_LOG: api=info,axum=info,tower_http=info
     PLUGINS_DIR: /app/plugins
@@ -75,7 +77,7 @@ app:
             pathType: Prefix
     tls: []
   env:
-    VITE_API_BASE_URL: http://localhost:8888
+    VITE_API_BASE_URL: https://refmd.example.com
   extraEnv: []
   podAnnotations: {}
   podLabels: {}

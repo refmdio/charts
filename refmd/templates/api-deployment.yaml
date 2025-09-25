@@ -68,12 +68,12 @@ spec:
             {{- toYaml .Values.api.resources | nindent 12 }}
           livenessProbe:
             httpGet:
-              path: /healthz
+              path: {{ .Values.api.healthPath }}
               port: http
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             httpGet:
-              path: /healthz
+              path: {{ .Values.api.healthPath }}
               port: http
             {{- toYaml .Values.readinessProbe | nindent 12 }}
       {{- with .Values.api.nodeSelector }}
