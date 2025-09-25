@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "refmd.fullname" . }}-api
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}
+spec:
+  type: {{ .Values.api.service.type }}
+  ports:
+    - port: {{ .Values.api.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}

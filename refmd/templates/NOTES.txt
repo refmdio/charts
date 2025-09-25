@@ -1,0 +1,33 @@
+1. Get the application URL by running these commands:
+{{- if .Values.app.ingress.enabled }}
+  NOTE: It may take a few minutes for the ingress resources to become ready.
+  {{- range .Values.app.ingress.hosts }}
+  http{{ if $.Values.app.ingress.tls }}s{{ end }}://{{ .host }}
+  {{- end }}
+{{- else if eq .Values.app.service.type "LoadBalancer" }}
+  Watch the service to find the external IP:
+    kubectl get svc {{ include "refmd.fullname" . }}-app --namespace {{ .Release.Namespace }} -w
+{{- else }}
+  The frontend service is available on port {{ .Values.app.service.port }} of the {{ .Values.app.service.type }} service {{ include "refmd.fullname" . }}-app.
+  Use port-forwarding for quick access:
+    kubectl port-forward svc/{{ include "refmd.fullname" . }}-app {{ .Values.app.service.port }}:{{ .Values.app.service.port }}
+{{- end }}
+
+2. API access:
+{{- if .Values.api.ingress.enabled }}
+  {{- range .Values.api.ingress.hosts }}
+  http{{ if $.Values.api.ingress.tls }}s{{ end }}://{{ .host }}
+  {{- end }}
+{{- else if eq .Values.api.service.type "LoadBalancer" }}
+  kubectl get svc {{ include "refmd.fullname" . }}-api --namespace {{ .Release.Namespace }} -w
+{{- else }}
+  kubectl port-forward svc/{{ include "refmd.fullname" . }}-api {{ .Values.api.service.port }}:{{ .Values.api.service.port }}
+{{- end }}
+
+{{- if .Values.postgres.enabled }}
+3. Default credentials:
+  Database user: {{ .Values.postgres.auth.username }}
+  Database name: {{ .Values.postgres.auth.database }}
+
+{{- end }}
+Update sensitive values (JWT/Encryption keys) before using this chart in production.

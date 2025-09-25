@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "refmd.fullname" . }}-app
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "app" "context" .) | nindent 4 }}
+data:
+{{- $env := .Values.app.env | default (dict) -}}
+{{- range $key, $value := $env }}
+  {{ $key }}: {{ $value | toString | quote }}
+{{- end }}

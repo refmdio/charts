@@ -1,0 +1,128 @@
+fullnameOverride: ""
+nameOverride: ""
+
+imagePullSecrets: []
+
+api:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/refmdio/refmd/api
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8888
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: api.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  podAnnotations: {}
+  podLabels: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  extraEnv: []
+  env:
+    RUST_ENV: production
+    API_PORT: "8888"
+    FRONTEND_URL: http://localhost:3000
+    PUBLIC_BASE_URL: http://localhost:8888
+    UPLOAD_MAX_BYTES: "26214400"
+    RUST_LOG: api=info,axum=info,tower_http=info
+    PLUGINS_DIR: /app/plugins
+  secrets:
+    JWT_SECRET: change-me-please
+    ENCRYPTION_KEY: change-me-please
+  existingSecret: ""
+  persistence:
+    data:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+    plugins:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 1Gi
+
+app:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/refmdio/refmd/app
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: refmd.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  env:
+    VITE_API_BASE_URL: http://localhost:8888
+  extraEnv: []
+  podAnnotations: {}
+  podLabels: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  auth:
+    database: refmd
+    username: refmd
+    password: refmd
+  service:
+    type: ClusterIP
+    port: 5432
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 8Gi
+  podAnnotations: {}
+  podLabels: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  existingSecret: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podSecurityContext: {}
+securityContext: {}
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 10

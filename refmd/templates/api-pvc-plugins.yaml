@@ -1,0 +1,17 @@
+{{- if .Values.api.persistence.plugins.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "refmd.fullname" . }}-api-plugins
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.api.persistence.plugins.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.api.persistence.plugins.size }}
+  {{- if .Values.api.persistence.plugins.storageClass }}
+  storageClassName: {{ .Values.api.persistence.plugins.storageClass }}
+  {{- end }}
+{{- end }}

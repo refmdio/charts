@@ -1,0 +1,36 @@
+{{- if .Values.api.ingress.enabled }}
+{{- $fullName := include "refmd.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-api
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}
+  {{- with .Values.api.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.api.ingress.className }}
+  ingressClassName: {{ .Values.api.ingress.className }}
+  {{- end }}
+  {{- if .Values.api.ingress.tls }}
+  tls:
+    {{- toYaml .Values.api.ingress.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.api.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ printf "%s-api" $fullName }}
+                port:
+                  number: {{ $.Values.api.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}

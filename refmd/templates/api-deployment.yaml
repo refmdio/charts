@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "refmd.fullname" . }}-api
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}
+spec:
+  replicas: {{ .Values.api.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 8 }}
+        {{- with .Values.api.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.api.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "refmd.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: api
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.api.service.port }}
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "refmd.fullname" . }}-api
+          {{- if or .Values.api.existingSecret .Values.api.secrets }}
+            - secretRef:
+                name: {{ default (printf "%s-api" (include "refmd.fullname" .)) .Values.api.existingSecret }}
+          {{- end }}
+          {{- with .Values.api.extraEnv }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.api.persistence.data.enabled .Values.api.persistence.plugins.enabled }}
+          volumeMounts:
+          {{- if .Values.api.persistence.data.enabled }}
+            - name: data
+              mountPath: /data
+          {{- end }}
+          {{- if .Values.api.persistence.plugins.enabled }}
+            - name: plugins
+              mountPath: /app/plugins
+          {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+      {{- with .Values.api.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.api.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.api.persistence.data.enabled .Values.api.persistence.plugins.enabled }}
+      volumes:
+      {{- if .Values.api.persistence.data.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "refmd.fullname" . }}-api-data
+      {{- end }}
+      {{- if .Values.api.persistence.plugins.enabled }}
+        - name: plugins
+          persistentVolumeClaim:
+            claimName: {{ include "refmd.fullname" . }}-api-plugins
+      {{- end }}
+      {{- end }}

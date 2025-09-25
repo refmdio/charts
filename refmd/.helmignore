@@ -1,0 +1,11 @@
+# Ignore Helm build artifacts
+*.tgz
+
+# VCS
+.git/
+.github/
+.gitignore
+
+# IDEs
+.idea/
+.vscode/

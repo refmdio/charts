@@ -1,0 +1,95 @@
+{{- if .Values.postgres.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "refmd.fullname" . }}-postgres
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "postgres" "context" .) | nindent 4 }}
+spec:
+  serviceName: {{ include "refmd.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "refmd.componentLabels" (dict "component" "postgres" "context" .) | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "refmd.componentLabels" (dict "component" "postgres" "context" .) | nindent 8 }}
+        {{- with .Values.postgres.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.postgres.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "refmd.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: postgres
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.postgres.service.port }}
+          envFrom:
+            - secretRef:
+                name: {{ default (printf "%s-postgres" (include "refmd.fullname" .)) .Values.postgres.existingSecret }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            {{- toYaml .Values.postgres.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ .Values.postgres.auth.username | quote }}]
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", {{ .Values.postgres.auth.username | quote }}]
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+      {{- with .Values.postgres.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.postgres.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.postgres.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.postgres.persistence.enabled }}
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
+  {{- if .Values.postgres.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "refmd.componentLabels" (dict "component" "postgres" "context" .) | nindent 10 }}
+      spec:
+        accessModes:
+          {{- toYaml .Values.postgres.persistence.accessModes | nindent 10 }}
+        resources:
+          requests:
+            storage: {{ .Values.postgres.persistence.size }}
+        {{- if .Values.postgres.persistence.storageClass }}
+        storageClassName: {{ .Values.postgres.persistence.storageClass }}
+        {{- end }}
+  {{- end }}
+{{- end }}

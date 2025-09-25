@@ -1,0 +1,6 @@
+apiVersion: v2
+name: refmd
+description: Helm chart for deploying the RefMD collaborative markdown platform.
+type: application
+version: 0.1.0
+appVersion: "latest"

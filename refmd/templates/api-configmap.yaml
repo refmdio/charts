@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "refmd.fullname" . }}-api
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "api" "context" .) | nindent 4 }}
+data:
+{{- $ctx := . -}}
+{{- $env := dict -}}
+{{- range $key, $value := .Values.api.env }}
+{{- $_ := set $env $key $value -}}
+{{- end }}
+{{- if and .Values.postgres.enabled (not (hasKey $env "DATABASE_URL")) -}}
+{{- $dbHost := printf "%s-postgres" (include "refmd.fullname" $ctx) -}}
+{{- $db := .Values.postgres.auth.database -}}
+{{- $user := .Values.postgres.auth.username -}}
+{{- $pass := .Values.postgres.auth.password -}}
+{{- $url := printf "postgresql://%s:%s@%s:%d/%s" $user $pass $dbHost (.Values.postgres.service.port | int) $db -}}
+{{- $_ := set $env "DATABASE_URL" $url -}}
+{{- end -}}
+{{- range $key, $value := $env }}
+  {{ $key }}: {{ $value | toString | quote }}
+{{- end }}
