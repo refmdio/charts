@@ -1,0 +1,57 @@
+{{- if and .Values.minio.enabled .Values.minioSetup.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "refmd.fullname" . }}-minio-setup
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "minio-setup" "context" .) | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.minioSetup.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "refmd.componentLabels" (dict "component" "minio-setup" "context" .) | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: minio-setup
+          image: "{{ .Values.minioSetup.image.repository }}:{{ .Values.minioSetup.image.tag }}"
+          imagePullPolicy: {{ .Values.minioSetup.image.pullPolicy }}
+          env:
+            - name: MINIO_ENDPOINT
+              value: {{ printf "http://%s-minio:%d" (include "refmd.fullname" .) (.Values.minio.service.port | int) | quote }}
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-minio" (include "refmd.fullname" .)) .Values.minio.existingSecret }}
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ default (printf "%s-minio" (include "refmd.fullname" .)) .Values.minio.existingSecret }}
+                  key: MINIO_ROOT_PASSWORD
+            - name: MINIO_BUCKET
+              value: {{ .Values.minioSetup.bucket | quote }}
+            - name: MINIO_POLICY
+              value: {{ .Values.minioSetup.policy | quote }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              until mc alias set local "${MINIO_ENDPOINT}" "${MINIO_ROOT_USER}" "${MINIO_ROOT_PASSWORD}" --insecure; do
+                sleep 1
+              done
+              until mc ready --insecure local; do
+                sleep 1
+              done
+              mc mb --ignore-existing "local/${MINIO_BUCKET}"
+              if [ "${MINIO_POLICY}" = "download" ]; then
+                mc anonymous set download "local/${MINIO_BUCKET}"
+              elif [ "${MINIO_POLICY}" = "public" ]; then
+                mc anonymous set public "local/${MINIO_BUCKET}"
+              fi
+{{- end }}

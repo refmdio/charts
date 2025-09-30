@@ -5,7 +5,12 @@ metadata:
   labels:
     {{- include "refmd.componentLabels" (dict "component" "app" "context" .) | nindent 4 }}
 data:
-{{- $env := .Values.app.env | default (dict) -}}
+{{- $ctx := . -}}
+{{- $env := deepCopy (.Values.app.env | default (dict)) -}}
+{{- if not (hasKey $env "VITE_API_BASE_URL") -}}
+{{- $apiURL := printf "http://%s-api:%d" (include "refmd.fullname" $ctx) (.Values.api.service.port | int) -}}
+{{- $_ := set $env "VITE_API_BASE_URL" $apiURL -}}
+{{- end -}}
 {{- range $key, $value := $env }}
   {{ $key }}: {{ $value | toString | quote }}
 {{- end }}

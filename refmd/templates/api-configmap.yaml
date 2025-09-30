@@ -18,6 +18,15 @@ data:
 {{- $url := printf "postgresql://%s:%s@%s:%d/%s" $user $pass $dbHost (.Values.postgres.service.port | int) $db -}}
 {{- $_ := set $env "DATABASE_URL" $url -}}
 {{- end -}}
+{{- if and .Values.redis.enabled (not (hasKey $env "REDIS_URL")) -}}
+{{- $redisHost := printf "%s-redis" (include "refmd.fullname" $ctx) -}}
+{{- $redisPort := .Values.redis.service.port | int -}}
+{{- $_ := set $env "REDIS_URL" (printf "redis://%s:%d/0" $redisHost $redisPort) -}}
+{{- end -}}
+{{- if and .Values.minio.enabled (not (hasKey $env "S3_ENDPOINT")) -}}
+{{- $minioEndpoint := printf "http://%s-minio:%d" (include "refmd.fullname" $ctx) (.Values.minio.service.port | int) -}}
+{{- $_ := set $env "S3_ENDPOINT" $minioEndpoint -}}
+{{- end -}}
 {{- range $key, $value := $env }}
   {{ $key }}: {{ $value | toString | quote }}
 {{- end }}
