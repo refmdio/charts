@@ -1,0 +1,51 @@
+# Example values for a minimal single-node deployment without HA.
+# Replace all secret values before using in production.
+
+fullnameOverride: refmd-local
+
+api:
+  replicaCount: 1
+  env:
+    RUST_ENV: development
+    FRONTEND_URL: http://localhost:3000
+    BACKEND_URL: http://localhost:8888
+    CLUSTER_MODE: "false"
+    STORAGE_BACKEND: filesystem
+    STORAGE_ROOT: /data/uploads
+    REDIS_STREAM_PREFIX: yrs-local
+    REDIS_MIN_MESSAGE_LIFETIME_MS: "60000"
+    REDIS_TASK_DEBOUNCE_MS: "1000"
+    REDIS_AWARENESS_TTL_MS: "15000"
+    REDIS_STREAM_MAX_LEN: "2048"
+    RUST_LOG: api=debug,axum=debug,tower_http=debug
+  secrets:
+    JWT_SECRET: local-jwt-secret-8ff0d2e59d994b239f4b9cb0f49c220d
+    ENCRYPTION_KEY: local-encryption-key-8ff0d2e59d994b239f4b9cb0f49c220d
+    PLUGIN_ASSET_SIGN_KEY: local-plugin-sign-key-1cac4eaf3951a519a584ff62383e2a53
+    S3_ACCESS_KEY: ""
+    S3_SECRET_KEY: ""
+  persistence:
+    data:
+      enabled: true
+    plugins:
+      enabled: true
+
+app:
+  replicaCount: 1
+  env:
+    VITE_API_BASE_URL: http://localhost:8888
+
+postgres:
+  enabled: true
+
+redis:
+  enabled: false
+
+minio:
+  enabled: false
+
+minioSetup:
+  enabled: false
+
+serviceAccount:
+  create: true

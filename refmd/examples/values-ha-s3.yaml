@@ -1,0 +1,53 @@
+# Example values for a HA deployment with Redis coordination and MinIO/S3 storage.
+# Replace all secret values before using in production.
+
+fullnameOverride: refmd-ha
+
+api:
+  replicaCount: 2
+  env:
+    RUST_ENV: production
+    FRONTEND_URL: https://refmd.example.com
+    BACKEND_URL: https://refmd.example.com
+    CLUSTER_MODE: "true"
+    STORAGE_BACKEND: s3
+    STORAGE_ROOT: uploads
+    S3_ENDPOINT: http://refmd-ha-minio:9000
+    S3_BUCKET: refmd-ha
+    S3_REGION: us-east-1
+    S3_USE_PATH_STYLE: "true"
+    REDIS_URL: redis://refmd-ha-redis:6379/0
+    REDIS_STREAM_PREFIX: yrs-ha
+    REDIS_MIN_MESSAGE_LIFETIME_MS: "120000"
+    REDIS_TASK_DEBOUNCE_MS: "5000"
+    REDIS_AWARENESS_TTL_MS: "45000"
+    REDIS_STREAM_MAX_LEN: "4096"
+    RUST_LOG: api=info,axum=info,tower_http=info
+  secrets:
+    JWT_SECRET: ha-jwt-secret-4bcec37df7c8417bb40d21825aade446
+    ENCRYPTION_KEY: ha-encryption-key-04316b5febea4f14bb5d3186cb515bd1
+    PLUGIN_ASSET_SIGN_KEY: ha-plugin-sign-key-1ccd397c536dec2a0741352cd5ff9d35
+    S3_ACCESS_KEY: refmd
+    S3_SECRET_KEY: refmd-minio-secret
+  persistence:
+    data:
+      enabled: false
+    plugins:
+      enabled: false
+
+app:
+  replicaCount: 2
+  env:
+    VITE_API_BASE_URL: https://refmd.example.com
+
+postgres:
+  enabled: true
+
+redis:
+  enabled: true
+
+minio:
+  enabled: true
+
+minioSetup:
+  enabled: true

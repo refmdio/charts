@@ -1,0 +1,52 @@
+# Example values for a single replica deployment using MinIO/S3 storage.
+# Replace all secret values before using in production.
+
+fullnameOverride: refmd-single-s3
+
+api:
+  replicaCount: 1
+  env:
+    RUST_ENV: development
+    FRONTEND_URL: http://localhost:3000
+    BACKEND_URL: http://localhost:8888
+    CLUSTER_MODE: "false"
+    STORAGE_BACKEND: s3
+    STORAGE_ROOT: uploads
+    S3_ENDPOINT: http://refmd-single-s3-minio:9000
+    S3_BUCKET: refmd
+    S3_REGION: us-east-1
+    S3_USE_PATH_STYLE: "true"
+    RUST_LOG: api=debug,axum=debug,tower_http=debug
+  secrets:
+    JWT_SECRET: local-jwt-secret-8ff0d2e59d994b239f4b9cb0f49c220d
+    ENCRYPTION_KEY: local-encryption-key-8ff0d2e59d994b239f4b9cb0f49c220d
+    PLUGIN_ASSET_SIGN_KEY: local-plugin-sign-key-1cac4eaf3951a519a584ff62383e2a53
+    S3_ACCESS_KEY: refmd
+    S3_SECRET_KEY: refmd-minio-secret
+  persistence:
+    data:
+      enabled: false
+    plugins:
+      enabled: false
+
+app:
+  replicaCount: 1
+  env:
+    VITE_API_BASE_URL: http://localhost:8888
+
+postgres:
+  enabled: true
+
+redis:
+  enabled: false
+
+minio:
+  enabled: true
+  service:
+    type: ClusterIP
+
+minioSetup:
+  enabled: true
+
+serviceAccount:
+  create: true

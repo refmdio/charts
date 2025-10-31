@@ -22,3 +22,19 @@ helm install my-refmd refmd/refmd \
 - `minioSetup.*`: Controls the post-install job that provisions buckets and access policies.
 
 See `values.yaml` for the full list of configurable parameters.
+
+## Example Values
+
+Sample overlays are available under `examples/`:
+
+- `values-local-minimal.yaml`: Single-node stack with filesystem uploads and no Redis/MinIO dependencies.
+- `values-single-s3.yaml`: Single API replica backed by MinIO/S3 for uploads.
+- `values-ha-s3.yaml`: HA profile with two API replicas, Redis coordination, and MinIO/S3 storage.
+
+Install with:
+
+```bash
+helm upgrade --install refmd charts/refmd \
+  --namespace refmd --create-namespace \
+  -f charts/refmd/examples/values-ha-s3.yaml
+```
