@@ -38,11 +38,9 @@ api:
     CLUSTER_MODE: "true"
     STORAGE_BACKEND: s3
     STORAGE_ROOT: uploads
-    S3_ENDPOINT: ""
     S3_BUCKET: refmd
     S3_REGION: us-east-1
     S3_USE_PATH_STYLE: "true"
-    REDIS_URL: ""
     REDIS_STREAM_PREFIX: yrs
     REDIS_MIN_MESSAGE_LIFETIME_MS: "120000"
     REDIS_TASK_DEBOUNCE_MS: "5000"
@@ -55,18 +53,19 @@ api:
   secrets:
     JWT_SECRET: change-me-please
     ENCRYPTION_KEY: change-me-please
+    PLUGIN_ASSET_SIGN_KEY: change-me-please
     S3_ACCESS_KEY: refmd
     S3_SECRET_KEY: refmd-minio-secret
   existingSecret: ""
   persistence:
     data:
-      enabled: true
+      enabled: false
       storageClass: ""
       accessModes:
         - ReadWriteOnce
       size: 8Gi
     plugins:
-      enabled: true
+      enabled: false
       storageClass: ""
       accessModes:
         - ReadWriteOnce
