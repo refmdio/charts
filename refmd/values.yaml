@@ -50,6 +50,7 @@ api:
     UPLOAD_MAX_BYTES: "26214400"
     RUST_LOG: api=info,axum=info,tower_http=info
     PLUGINS_DIR: /app/plugins
+  extraEnvFrom: []
   secrets:
     JWT_SECRET: change-me-please
     ENCRYPTION_KEY: change-me-please

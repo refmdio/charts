@@ -49,6 +49,9 @@ spec:
             - secretRef:
                 name: {{ default (printf "%s-api" (include "refmd.fullname" .)) .Values.api.existingSecret }}
           {{- end }}
+          {{- with .Values.api.extraEnvFrom }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           {{- with .Values.api.extraEnv }}
           env:
             {{- toYaml . | nindent 12 }}
