@@ -40,6 +40,25 @@ helm upgrade --install refmd charts/refmd \
   -f charts/refmd/examples/values-ha-s3.yaml
 ```
 
+To trust an internal certificate authority for SSR/API calls:
+
+```yaml
+app:
+  extraEnv:
+    - name: NODE_EXTRA_CA_CERTS
+      value: /etc/ssl/custom-ca/ca.crt
+  extraVolumes:
+    - name: custom-ca
+      secret:
+        secretName: refmd-custom-ca
+  extraVolumeMounts:
+    - name: custom-ca
+      mountPath: /etc/ssl/custom-ca
+      readOnly: true
+```
+
+Create the secret ahead of time (e.g. `kubectl create secret generic refmd-custom-ca --from-file=ca.crt=internal-ca.pem`).
+
 To point the API at an external database managed outside the chart, mount a secret that contains the connection string:
 
 ```yaml
