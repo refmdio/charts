@@ -16,6 +16,7 @@ helm install my-refmd refmd/refmd \
 
 - `app.*`: Controls the frontend deployment, service, and ingress settings.
 - `api.*`: Configures the backend API, including clustering and storage integration settings. Persistent volumes for the API are disabled by default because the HA profile stores uploads in MinIO/S3. Enable the PVCs only when using the filesystem storage backend. Use `api.extraEnv` / `api.extraEnvFrom` to mount additional secrets or config maps (for example, supplying an external `DATABASE_URL`).
+- `*.extraVolumes` / `*.extraVolumeMounts`: Attach additional secrets or configmaps (for instance, a custom CA bundle mounted alongside `NODE_EXTRA_CA_CERTS`).
 - `postgres.*`: Enables the bundled PostgreSQL database or allows pointing to an external instance.
 - `redis.*`: Manages the Redis instance used for realtime coordination and task queues.
 - `minio.*`: Configures the MinIO object storage deployment.

@@ -56,16 +56,19 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or .Values.api.persistence.data.enabled .Values.api.persistence.plugins.enabled }}
-          volumeMounts:
+          {{- $apiVolumeMounts := list }}
           {{- if .Values.api.persistence.data.enabled }}
-            - name: data
-              mountPath: /data
+          {{- $apiVolumeMounts = append $apiVolumeMounts (dict "name" "data" "mountPath" "/data") }}
           {{- end }}
           {{- if .Values.api.persistence.plugins.enabled }}
-            - name: plugins
-              mountPath: /app/plugins
+          {{- $apiVolumeMounts = append $apiVolumeMounts (dict "name" "plugins" "mountPath" "/app/plugins") }}
           {{- end }}
+          {{- if .Values.api.extraVolumeMounts }}
+          {{- $apiVolumeMounts = concat $apiVolumeMounts .Values.api.extraVolumeMounts }}
+          {{- end }}
+          {{- if $apiVolumeMounts }}
+          volumeMounts:
+            {{- toYaml $apiVolumeMounts | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.api.resources | nindent 12 }}
@@ -91,16 +94,17 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if or .Values.api.persistence.data.enabled .Values.api.persistence.plugins.enabled }}
-      volumes:
+      {{- $apiVolumes := list }}
       {{- if .Values.api.persistence.data.enabled }}
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ include "refmd.fullname" . }}-api-data
+      {{- $apiVolumes = append $apiVolumes (dict "name" "data" "persistentVolumeClaim" (dict "claimName" (printf "%s-api-data" (include "refmd.fullname" .)))) }}
       {{- end }}
       {{- if .Values.api.persistence.plugins.enabled }}
-        - name: plugins
-          persistentVolumeClaim:
-            claimName: {{ include "refmd.fullname" . }}-api-plugins
+      {{- $apiVolumes = append $apiVolumes (dict "name" "plugins" "persistentVolumeClaim" (dict "claimName" (printf "%s-api-plugins" (include "refmd.fullname" .)))) }}
       {{- end }}
+      {{- if .Values.api.extraVolumes }}
+      {{- $apiVolumes = concat $apiVolumes .Values.api.extraVolumes }}
+      {{- end }}
+      {{- if $apiVolumes }}
+      volumes:
+        {{- toYaml $apiVolumes | nindent 8 }}
       {{- end }}

@@ -49,6 +49,10 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with .Values.app.extraVolumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
       {{- with .Values.app.nodeSelector }}
@@ -61,5 +65,9 @@ spec:
       {{- end }}
       {{- with .Values.app.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.app.extraVolumes }}
+      volumes:
         {{- toYaml . | nindent 8 }}
       {{- end }}
