@@ -93,6 +93,7 @@ app:
     tls: []
   env:
     VITE_API_BASE_URL: https://refmd.example.com
+    VITE_PUBLIC_BASE_URL: https://refmd.example.com
   extraEnv: []
   podAnnotations: {}
   podLabels: {}
