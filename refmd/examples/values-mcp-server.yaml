@@ -1,0 +1,23 @@
+mcpServer:
+  enabled: true
+  env:
+    OAUTH_CLIENT_IDS: chatgpt-connector
+    OAUTH_ALLOWED_REDIRECTS: https://chat.openai.com/aip/mcp/oauth/callback
+    MCP_DB_DRIVER: sqlite
+    MCP_DB_SQLITE_PATH: /data/refmd-mcp.sqlite
+  persistence:
+    enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - host: mcp.refmd.example.com
+        paths:
+          - path: /sse
+            pathType: Prefix
+          - path: /mcp
+            pathType: Prefix
+          - path: /oauth
+            pathType: Prefix
+          - path: /.well-known
+            pathType: Prefix
+

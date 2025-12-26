@@ -1,0 +1,20 @@
+{{- if .Values.mcpServer.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "refmd.fullname" . }}-mcp-server
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "mcp-server" "context" .) | nindent 4 }}
+data:
+{{- $ctx := . -}}
+{{- $env := deepCopy (.Values.mcpServer.env | default (dict)) -}}
+{{- $apiBase := (get $env "REFMD_API_BASE" | default "") | toString -}}
+{{- if eq $apiBase "" -}}
+{{- $apiURL := printf "http://%s-api:%d" (include "refmd.fullname" $ctx) (.Values.api.service.port | int) -}}
+{{- $_ := set $env "REFMD_API_BASE" $apiURL -}}
+{{- end -}}
+{{- range $key, $value := $env }}
+  {{ $key }}: {{ $value | toString | quote }}
+{{- end }}
+{{- end }}
+

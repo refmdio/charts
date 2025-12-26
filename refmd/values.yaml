@@ -192,6 +192,64 @@ minioSetup:
   policy: download
   backoffLimit: 5
 
+mcpServer:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: ghcr.io/refmdio/refmd-mcp
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3334
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: mcp.refmd.example.com
+        paths:
+          - path: /sse
+            pathType: Prefix
+          - path: /mcp
+            pathType: Prefix
+          - path: /oauth
+            pathType: Prefix
+          - path: /.well-known
+            pathType: Prefix
+    tls: []
+  env:
+    REFMD_API_BASE: ""
+    OAUTH_CLIENT_IDS: ""
+    OAUTH_ALLOWED_REDIRECTS: ""
+    OAUTH_ISSUER: ""
+    ACCESS_TOKEN_TTL_SECONDS: ""
+    REFRESH_TOKEN_TTL_SECONDS: ""
+    MCP_DB_DRIVER: ""
+    MCP_DB_URL: ""
+    MCP_DB_SQLITE_PATH: ""
+    HOST: 0.0.0.0
+    PORT: "3334"
+  extraEnvFrom: []
+  extraEnv: []
+  secrets: {}
+  existingSecret: ""
+  persistence:
+    enabled: false
+    storageClass: ""
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+    mountPath: /data
+  podAnnotations: {}
+  podLabels: {}
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  extraVolumeMounts: []
+  extraVolumes: []
+
 serviceAccount:
   create: true
   annotations: {}

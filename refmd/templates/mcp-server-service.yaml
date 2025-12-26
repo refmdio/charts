@@ -1,0 +1,18 @@
+{{- if .Values.mcpServer.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "refmd.fullname" . }}-mcp-server
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "mcp-server" "context" .) | nindent 4 }}
+spec:
+  type: {{ .Values.mcpServer.service.type }}
+  ports:
+    - port: {{ .Values.mcpServer.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "refmd.componentLabels" (dict "component" "mcp-server" "context" .) | nindent 4 }}
+{{- end }}
+

@@ -21,6 +21,7 @@ helm install my-refmd refmd/refmd \
 - `redis.*`: Manages the Redis instance used for realtime coordination and task queues.
 - `minio.*`: Configures the MinIO object storage deployment.
 - `minioSetup.*`: Controls the post-install job that provisions buckets and access policies.
+- `mcpServer.*`: Optionally deploys the RefMD MCP Server (SSE + Streamable HTTP) for hosted MCP clients.
 
 See `values.yaml` for the full list of configurable parameters.
 
@@ -31,6 +32,7 @@ Sample overlays are available under `examples/`:
 - `values-local-minimal.yaml`: Single-node stack with filesystem uploads and no Redis/MinIO dependencies.
 - `values-single-s3.yaml`: Single API replica backed by MinIO/S3 for uploads.
 - `values-ha-s3.yaml`: HA profile with two API replicas, Redis coordination, and MinIO/S3 storage.
+- `values-mcp-server.yaml`: Enables the optional MCP server with a persisted SQLite token store.
 
 Install with:
 

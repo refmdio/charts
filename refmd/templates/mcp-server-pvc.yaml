@@ -1,0 +1,18 @@
+{{- if and .Values.mcpServer.enabled .Values.mcpServer.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "refmd.fullname" . }}-mcp-server
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "mcp-server" "context" .) | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.mcpServer.persistence.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.mcpServer.persistence.size }}
+  {{- if .Values.mcpServer.persistence.storageClass }}
+  storageClassName: {{ .Values.mcpServer.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+

@@ -1,0 +1,37 @@
+{{- if .Values.mcpServer.ingress.enabled }}
+{{- $fullName := include "refmd.fullname" . -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-mcp-server
+  labels:
+    {{- include "refmd.componentLabels" (dict "component" "mcp-server" "context" .) | nindent 4 }}
+  {{- with .Values.mcpServer.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.mcpServer.ingress.className }}
+  ingressClassName: {{ .Values.mcpServer.ingress.className }}
+  {{- end }}
+  {{- if .Values.mcpServer.ingress.tls }}
+  tls:
+    {{- toYaml .Values.mcpServer.ingress.tls | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.mcpServer.ingress.hosts }}
+    - host: {{ .host }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                name: {{ printf "%s-mcp-server" $fullName }}
+                port:
+                  number: {{ $.Values.mcpServer.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+
